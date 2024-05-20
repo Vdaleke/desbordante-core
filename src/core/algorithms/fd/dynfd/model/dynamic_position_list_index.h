@@ -19,18 +19,22 @@ public:
 
 private:
     std::list<Cluster> clusters_;
-    std::unordered_map<int, std::set<int>> inverted_index_;
+    std::unordered_map<int, Cluster*> inverted_index_;
     unsigned int size_;
 
 public:
-    PositionListIndex();
-    static std::unique_ptr<PositionListIndex> CreateFor(std::vector<int>& data);
+    DynamicPositionListIndex(std::list<Cluster> clusters,
+                             std::unordered_map<int, Cluster*> inverted_index, unsigned int size);
+    static std::unique_ptr<DynamicPositionListIndex> CreateFor(std::vector<int>& data);
 
     unsigned int GetSize() const {
         return size_;
     }
 
-    std::unique_ptr<PositionListIndex> Intersect(PositionListIndex const* that) const;
+    // std::unique_ptr<DynamicPositionListIndex> Intersect(DynamicPositionListIndex const* that)
+    // const;
+
+    std::string ToString() const;
 };
 
 using DPLI = DynamicPositionListIndex;
