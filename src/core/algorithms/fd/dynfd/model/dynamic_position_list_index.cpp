@@ -14,7 +14,7 @@ std::unique_ptr<DynamicPositionListIndex> DynamicPositionListIndex::CreateFor(st
     size = data.size();
     for (unsigned long position = 0; position < size; ++position) {
         int value_id = data[position];
-        inverted_index[value_id].insert(position);
+        inverted_index[value_id].insert(static_cast<int>(position));
     }
 
     for (auto const& [value_id, positions] : inverted_index) {

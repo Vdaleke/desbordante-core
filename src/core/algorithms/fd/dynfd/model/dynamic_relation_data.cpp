@@ -4,8 +4,6 @@
 
 #include <easylogging++.h>
 
-#include "relational_schema.h"
-
 namespace model {
 
 std::unique_ptr<DynamicRelationData> DynamicRelationData::CreateFrom(
@@ -49,14 +47,14 @@ std::unique_ptr<DynamicRelationData> DynamicRelationData::CreateFrom(
         auto column = Column(schema.get(), data_stream.GetColumnName(i), i);
         schema->AppendColumn(std::move(column));
         auto pli = DynamicPositionListIndex::CreateFor(column_dictionary_encoded_data[i]);
-        column_dictionary_encoded_data.emplace_back(schema->GetColumn(i), std::move(pli),
+        column_data.emplace_back(schema->GetColumn(i), std::move(pli),
                                                     std::move(column_dictionary_encoded_data[i]));
     }
 
     schema->Init();
 
     return std::make_unique<DynamicRelationData>(std::move(schema), std::move(column_data),
-                                                 std::move(column_dictionary_encoded_data));
+                                                 std::move(value_dictionary));
 }
 
 }  // namespace model

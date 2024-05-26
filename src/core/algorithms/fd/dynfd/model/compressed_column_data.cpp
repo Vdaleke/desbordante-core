@@ -13,4 +13,12 @@ CompressedColumnData::CompressedColumnData(
       position_list_index_(std::move(position_list_index)),
       column_data_(std::move(column_data)) {}
 
+std::string CompressedColumnData::ToString() const {
+    return "Data for " + column_->ToString();
+}
+
+size_t CompressedColumnData::GetNumRows() const {
+    return column_data_.size();
+}
+
 }  // namespace model

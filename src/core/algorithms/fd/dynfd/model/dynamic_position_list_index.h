@@ -30,7 +30,7 @@ public:
         return size_;
     }
 
-    std::unique_ptr<DynamicPositionListIndex> Intersect(DynamicPositionListIndex const* that) const;
+    // std::unique_ptr<DynamicPositionListIndex> Intersect(DynamicPositionListIndex const* that) const;
 };
 
 using DPLI = DynamicPositionListIndex;
