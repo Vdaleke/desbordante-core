@@ -8,19 +8,18 @@ DynamicPositionListIndex::DynamicPositionListIndex(std::list<Cluster> clusters,
     : clusters_(std::move(clusters)), inverted_index_(std::move(inverted_index)), size_(size) {}
 
 std::unique_ptr<DynamicPositionListIndex> DynamicPositionListIndex::CreateFor(
-        std::vector<int>& data) {
+        std::vector<int> const& data) {
     std::list<Cluster> clusters;
     std::unordered_map<int, Cluster*> inverted_index;
-    unsigned int size;
+    unsigned int size = data.size();
 
-    size = data.size();
-    for (unsigned long position = 0; position < size; ++position) {
-        int value_id = data[position];
+    int id = 0;
+    for (auto value_id : data) {
         if (inverted_index.find(value_id) == inverted_index.end()) {
             clusters.emplace_back();
             inverted_index[value_id] = &clusters.back();
         }
-        (*inverted_index[value_id]).insert(static_cast<int>(position));
+        (*inverted_index[value_id]).insert(static_cast<int>(id++));
     }
 
     return std::make_unique<DynamicPositionListIndex>(std::move(clusters),

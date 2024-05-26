@@ -14,10 +14,9 @@ std::unique_ptr<DynamicRelationData> DynamicRelationData::CreateFrom(
     size_t const num_columns = data_stream.GetNumberOfColumns();
     std::vector<std::vector<int>> column_dictionary_encoded_data =
             std::vector<std::vector<int>>(num_columns);
-    std::vector<std::string> row;
 
     while (data_stream.HasNextRow()) {
-        row = data_stream.GetNextRow();
+        std::vector<std::string> row = data_stream.GetNextRow();
 
         if (row.size() != num_columns) {
             LOG(WARNING) << "Unexpected number of columns for a row, skipping (expected "
@@ -47,8 +46,7 @@ std::unique_ptr<DynamicRelationData> DynamicRelationData::CreateFrom(
         auto column = Column(schema.get(), data_stream.GetColumnName(i), i);
         schema->AppendColumn(std::move(column));
         auto pli = DynamicPositionListIndex::CreateFor(column_dictionary_encoded_data[i]);
-        column_data.emplace_back(schema->GetColumn(i), std::move(pli),
-                                 std::move(column_dictionary_encoded_data[i]));
+        column_data.emplace_back(schema->GetColumn(i), std::move(pli));
     }
 
     schema->Init();
