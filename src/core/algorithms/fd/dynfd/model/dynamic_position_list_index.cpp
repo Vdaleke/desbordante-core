@@ -2,13 +2,16 @@
 
 #include <easylogging++.h>
 
-namespace model {
+namespace model::dynfd {
 
 DynamicPositionListIndex::DynamicPositionListIndex(std::list<Cluster> clusters,
                                                    std::unordered_map<int, Cluster*> inverted_index,
                                                    std::unordered_map<int, int> hash_index,
                                                    unsigned int size)
-    : clusters_(std::move(clusters)), inverted_index_(std::move(inverted_index)), size_(size) {}
+    : clusters_(std::move(clusters)),
+      inverted_index_(std::move(inverted_index)),
+      hash_index_(std::move(hash_index)),
+      size_(size) {}
 
 std::unique_ptr<DynamicPositionListIndex> DynamicPositionListIndex::CreateFor(
         std::vector<int> const& data) {
@@ -31,20 +34,25 @@ std::unique_ptr<DynamicPositionListIndex> DynamicPositionListIndex::CreateFor(
             std::move(clusters), std::move(inverted_index), std::move(hash_index), size);
 }
 
-std::string DynamicPositionListIndex::ToString() const {
-    std::string res = "[";
-    for (auto& cluster : clusters_) {
-        res.push_back('[');
-        for (int v : cluster) {
-            res.append(std::to_string(v) + ", ");
-        }
-        res.erase(res.size() - 2);
-        res.push_back(']');
-        res += ", ";
+void DynamicPositionListIndex::Erase(int record_id) {
+    int value_id = hash_index_[record_id];
+    (*inverted_index_[value_id]).erase(record_id);
+    hash_index_.erase(record_id);
+    size_--;
+}
+
+void DynamicPositionListIndex::Insert(int record_id, int value_id) {
+    hash_index_[record_id] = value_id;
+    if (inverted_index_.find(value_id) == inverted_index_.end()) {
+        clusters_.emplace_back();
+        inverted_index_[value_id] = &clusters_.back();
     }
-    res.erase(res.size() - 2);
-    res.push_back(']');
-    return res;
+    (*inverted_index_[value_id]).insert(record_id);
+    size_++;
+}
+
+unsigned int DynamicPositionListIndex::GetSize() const {
+    return size_;
 }
 
 std::unique_ptr<DynamicPositionListIndex> DynamicPositionListIndex::FullIntersect(
@@ -78,4 +86,20 @@ std::unique_ptr<DynamicPositionListIndex> DynamicPositionListIndex::FullIntersec
                                                       std::move(new_hash_index), new_size);
 }
 
-}  // namespace model
+std::string DynamicPositionListIndex::ToString() const {
+    std::string res = "[";
+    for (auto& cluster : clusters_) {
+        res.push_back('[');
+        for (int v : cluster) {
+            res.append(std::to_string(v) + ", ");
+        }
+        res.erase(res.size() - 2);
+        res.push_back(']');
+        res += ", ";
+    }
+    res.erase(res.size() - 2);
+    res.push_back(']');
+    return res;
+}
+
+}  // namespace model::dynfd
