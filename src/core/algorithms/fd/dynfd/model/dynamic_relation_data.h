@@ -6,7 +6,7 @@
 #include "model/table/idataset_stream.h"
 #include "model/table/relation_data.h"
 
-namespace model {
+namespace model::dynfd {
 
 class DynamicRelationData : AbstractRelationData<CompressedColumnData> {
     std::unordered_map<std::string, int> value_dictionary_;
@@ -18,7 +18,7 @@ class DynamicRelationData : AbstractRelationData<CompressedColumnData> {
         return column_data_[0].GetNumRows();
     }
 
-    static std::unique_ptr<DynamicRelationData> CreateFrom(model::IDatasetStream& data_stream);
+    static std::unique_ptr<DynamicRelationData> CreateFrom(IDatasetStream& data_stream);
 
 public:
     explicit DynamicRelationData(std::unique_ptr<RelationalSchema> schema,
@@ -28,4 +28,4 @@ public:
           value_dictionary_(std::move(value_dictionary)) {}
 };
 
-}  // namespace model
+}  // namespace model::dynfd

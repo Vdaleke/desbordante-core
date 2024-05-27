@@ -1,6 +1,6 @@
 #include "compressed_column_data.h"
 
-namespace model {
+namespace model::dynfd {
 
 CompressedColumnData::CompressedColumnData(
         Column const* column, std::unique_ptr<DynamicPositionListIndex> position_list_index)
@@ -14,4 +14,4 @@ size_t CompressedColumnData::GetNumRows() const {
     return position_list_index_->GetSize();
 }
 
-}  // namespace model
+}  // namespace model::dynfd

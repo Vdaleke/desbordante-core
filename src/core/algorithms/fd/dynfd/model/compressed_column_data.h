@@ -1,11 +1,12 @@
 #pragma once
+
 #include <memory>
 #include <vector>
 
 #include "dynamic_position_list_index.h"
 #include "model/table/abstract_column_data.h"
 
-namespace model {
+namespace model::dynfd {
 
 class CompressedColumnData : AbstractColumnData {
     std::shared_ptr<DynamicPositionListIndex> position_list_index_;
@@ -19,4 +20,4 @@ public:
     [[nodiscard]] std::string ToString() const final;
 };
 
-}  // namespace model
+}  // namespace model::dynfd
