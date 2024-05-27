@@ -1,6 +1,6 @@
 #pragma once
 
-class dynfd {
+namespace dynfd {
+class DynFD {};
 
-};
-
+}  // namespace dynfd

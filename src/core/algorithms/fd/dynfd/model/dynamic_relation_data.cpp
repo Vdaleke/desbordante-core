@@ -4,10 +4,9 @@
 
 #include <easylogging++.h>
 
-namespace model {
+namespace model::dynfd {
 
-std::unique_ptr<DynamicRelationData> DynamicRelationData::CreateFrom(
-        model::IDatasetStream& data_stream) {
+std::unique_ptr<DynamicRelationData> DynamicRelationData::CreateFrom(IDatasetStream& data_stream) {
     auto schema = std::make_unique<RelationalSchema>(data_stream.GetRelationName());
     int next_value_id = 1;
     std::unordered_map<std::string, int> value_dictionary;
@@ -55,4 +54,4 @@ std::unique_ptr<DynamicRelationData> DynamicRelationData::CreateFrom(
                                                  std::move(value_dictionary));
 }
 
-}  // namespace model
+}  // namespace model::dynfd
