@@ -1,7 +1,6 @@
 #pragma once
 
 #include <memory>
-#include <vector>
 
 #include "dynamic_position_list_index.h"
 #include "model/table/abstract_column_data.h"

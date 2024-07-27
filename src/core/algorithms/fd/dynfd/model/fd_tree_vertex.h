@@ -95,12 +95,20 @@ private:
     void GetLevelRecursive(unsigned target_level, unsigned cur_level, boost::dynamic_bitset<> lhs,
                            std::vector<LhsPair>& vertices);
 
-    void GetFdAndGeneralsRecursive(boost::dynamic_bitset<> const& lhs,
-                                   boost::dynamic_bitset<> cur_lhs, size_t rhs, size_t cur_bit,
-                                   std::vector<boost::dynamic_bitset<>>& result) const;
+    void GetGeneralsRecursive(boost::dynamic_bitset<> const& lhs, boost::dynamic_bitset<>& cur_lhs,
+                              size_t rhs, size_t cur_bit,
+                              std::vector<boost::dynamic_bitset<>>& result) const;
+
+    void GetSpecialsRecursive(boost::dynamic_bitset<> const& lhs, boost::dynamic_bitset<>& cur_lhs,
+                              size_t rhs, size_t cur_bit,
+                              std::vector<boost::dynamic_bitset<>>& result) const;
 
     bool FindFdOrGeneralRecursive(boost::dynamic_bitset<> const& lhs, size_t rhs,
                                   size_t cur_bit) const;
+
+    // TODO: make shorter the name of the 3rd parameter
+    bool FindFdOrSpecialRecursive(boost::dynamic_bitset<> const& lhs, size_t rhs,
+                                  size_t next_after_last_lhs_set_bit, size_t cur_bit) const;
 
     bool RemoveRecursive(boost::dynamic_bitset<> const& lhs, size_t rhs, size_t current_lhs_attr);
 
@@ -147,6 +155,9 @@ public:
     std::shared_ptr<FDTreeVertex> GetChildIfExists(size_t pos) const;
 
     bool ContainsChildAt(size_t pos) const {
+        if (!HasChildren()) {
+            return false;
+        }
         return children_.at(pos) != nullptr;
     }
 
@@ -155,4 +166,4 @@ public:
     }
 };
 
-}  // namespace algos::hyfd::fd_tree
+}  // namespace model::dynfd

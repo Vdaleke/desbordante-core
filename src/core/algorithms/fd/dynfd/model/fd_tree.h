@@ -9,7 +9,6 @@
 #include "fd_tree_vertex.h"
 
 namespace model::dynfd {
-
 /**
  * FD prefix tree.
  *
@@ -36,50 +35,60 @@ public:
         return root_;
     }
 
-    [[nodiscard]] FDTreeVertex const& GetRoot() const noexcept {
+    [[nodiscard]] FDTreeVertex const &GetRoot() const noexcept {
         return *root_;
     }
 
-    std::shared_ptr<FDTreeVertex> AddFD(boost::dynamic_bitset<> const& lhs, size_t rhs);
+    std::shared_ptr<FDTreeVertex> AddFD(boost::dynamic_bitset<> const &lhs, size_t const rhs);
 
-    bool ContainsFD(boost::dynamic_bitset<> const& lhs, size_t rhs);
+    bool ContainsFD(boost::dynamic_bitset<> const &lhs, size_t const rhs) const;
 
     /**
      * Recursively finds node representing given lhs and removes given rhs bit from it.
      * Destroys vertices whose children became empty.
      */
-    void Remove(boost::dynamic_bitset<> const& lhs, size_t rhs) {
+    void Remove(boost::dynamic_bitset<> const &lhs, size_t const rhs) {
         root_->RemoveRecursive(lhs, rhs, lhs.find_first());
     }
 
     /**
-     * Gets LHSs of all FDs having at least given lhs and rhs.
+     * Gets LHSs of all FDs having a proper subset of giving lhs and rhs.
      */
-    [[nodiscard]] std::vector<boost::dynamic_bitset<>> GetFdAndGenerals(
-            boost::dynamic_bitset<> const& lhs, size_t rhs) const;
+    [[nodiscard]] std::vector<boost::dynamic_bitset<> > GetGenerals(
+            boost::dynamic_bitset<> const &lhs, size_t rhs) const;
+
+    /**
+     * Gets LHSs of all FDs having given lhs as a proper subset and rhs.
+     */
+    [[nodiscard]] std::vector<boost::dynamic_bitset<> > GetSpecials(
+            boost::dynamic_bitset<> const &lhs, size_t rhs) const;
 
     /**
      * Checks if any FD has at least given lhs and rhs.
      */
-    [[nodiscard]] bool FindFdOrGeneral(boost::dynamic_bitset<> const& lhs, size_t rhs) const {
+    [[nodiscard]] bool ContainsFdOrGeneral(boost::dynamic_bitset<> const &lhs, size_t rhs) const {
         return root_->FindFdOrGeneralRecursive(lhs, rhs, lhs.find_first());
     }
+
+    /**
+     * Checks if any FD has given lhs and rhs.
+     */
+    [[nodiscard]] bool ContainsFdOrSpecial(boost::dynamic_bitset<> const &lhs, size_t rhs) const;
 
     /**
      * Gets nodes representing FDs with LHS of given arity.
      * @param target_level arity of returned FDs LHSs
      */
-    std::vector<LhsPair> GetLevel(unsigned target_level);
+    std::vector<LhsPair> GetLevel(unsigned target_level) const;
 
     /**
      * @return vector of all FDs
      */
-    [[nodiscard]] std::vector<RawFD> FillFDs() const {
-        std::vector<RawFD> result;
-        boost::dynamic_bitset<> lhs_for_traverse(GetRoot().GetNumAttributes());
-        GetRoot().FillFDs(result, lhs_for_traverse);
-        return result;
-    }
-};
+    [[nodiscard]] std::vector<RawFD> FillFDs() const;
 
+    /**
+     * @return string representation of the tree
+     */
+    std::string FDsToString() const;
+};
 }  // namespace model::dynfd
