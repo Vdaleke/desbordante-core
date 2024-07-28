@@ -27,15 +27,14 @@ unsigned long long HyFD::ExecuteInternal() {
     auto const start_time = std::chrono::system_clock::now();
 
     auto [plis, pli_records, og_mapping] = Preprocess(relation_.get());
-    auto const plis_shared = std::make_shared<PLIs>(std::move(plis));
+    auto plis_shared = std::make_shared<PLIs>(std::move(plis));
     auto const pli_records_shared = std::make_shared<Rows>(std::move(pli_records));
 
     Sampler sampler(plis_shared, pli_records_shared);
 
-    auto const positive_cover_tree =
-            std::make_shared<fd_tree::FDTree>(GetRelation().GetNumColumns());
-    Inductor inductor(positive_cover_tree);
-    Validator validator(positive_cover_tree, plis_shared, pli_records_shared);
+    positive_cover_tree_ = std::make_shared<model::FDTree<>>(GetRelation().GetNumColumns());
+    Inductor inductor(positive_cover_tree_);
+    Validator validator(positive_cover_tree_, plis_shared, pli_records_shared);
 
     IdPairs comparison_suggestions;
 
@@ -53,7 +52,7 @@ unsigned long long HyFD::ExecuteInternal() {
         LOG(TRACE) << "Cycle done";
     }
 
-    auto fds = positive_cover_tree->FillFDs();
+    auto fds = positive_cover_tree_->FillFDs();
     RegisterFDs(std::move(fds), og_mapping);
 
     SetProgress(kTotalProgressPercent);
@@ -75,6 +74,10 @@ void HyFD::RegisterFDs(std::vector<RawFD>&& fds, std::vector<hy::ClusterId> cons
 
         RegisterFd(std::move(lhs_v), std::move(rhs_c));
     }
+}
+
+std::shared_ptr<model::FDTree<>> HyFD::GetPositiveCoverTree() const {
+    return positive_cover_tree_;
 }
 
 }  // namespace algos::hyfd

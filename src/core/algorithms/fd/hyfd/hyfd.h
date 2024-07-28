@@ -8,6 +8,7 @@
 #include "algorithms/fd/hycommon/types.h"
 #include "algorithms/fd/pli_based_fd_algorithm.h"
 #include "algorithms/fd/raw_fd.h"
+#include "model/FDTrees/fd_tree.h"
 #include "model/table/position_list_index.h"
 
 namespace algos::hyfd {
@@ -37,14 +38,19 @@ namespace algos::hyfd {
  */
 class HyFD : public PliBasedFDAlgorithm {
 private:
+    std::shared_ptr<model::FDTree<>> positive_cover_tree_;
+
     void ResetStateFd() final {}
 
     unsigned long long ExecuteInternal() override;
 
-    void RegisterFDs(std::vector<RawFD>&& fds, std::vector<algos::hy::ClusterId> const& og_mapping);
+    void RegisterFDs(std::vector<RawFD>&& fds, std::vector<hy::ClusterId> const& og_mapping);
 
 public:
     HyFD(std::optional<ColumnLayoutRelationDataManager> relation_manager = std::nullopt);
+
+    [[nodiscard]] std::shared_ptr<model::FDTree<>> GetPositiveCoverTree() const;
+    [[nodiscard]] std::shared_ptr<std::vector<model::PositionListIndex*>> GetPlisShared() const;
 };
 
 }  // namespace algos::hyfd

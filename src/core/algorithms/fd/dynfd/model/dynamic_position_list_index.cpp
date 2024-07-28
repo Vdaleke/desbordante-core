@@ -2,7 +2,7 @@
 
 #include <easylogging++.h>
 
-namespace model::dynfd {
+namespace dynfd {
 DynamicPositionListIndex::DynamicPositionListIndex(
         std::list<Cluster> clusters, std::unordered_map<int, Cluster *> inverted_index,
         std::unordered_map<int, int> hash_index, int next_record_id, unsigned int size)
@@ -34,6 +34,11 @@ std::unique_ptr<DynamicPositionListIndex> DynamicPositionListIndex::CreateFor(
                                                       std::move(hash_index), next_record_id, size);
 }
 
+std::unique_ptr<DynamicPositionListIndex> DynamicPositionListIndex::CreateFromStaticPLI(
+        model::PositionListIndex const &pli) {
+    return CreateFor(*pli.CalculateAndGetProbingTable());
+}
+
 void DynamicPositionListIndex::Erase(int const record_id) {
     int const value_id = hash_index_[record_id];
     inverted_index_[value_id]->erase(record_id);
@@ -57,7 +62,7 @@ unsigned int DynamicPositionListIndex::GetSize() const {
 }
 
 std::unique_ptr<DynamicPositionListIndex> DynamicPositionListIndex::FullIntersect(
-        DynamicPositionListIndex const *that) const {
+        DynamicPositionListIndex const &that) const {
     std::unordered_map<int, Cluster> partial_index;
     std::list<Cluster> new_clusters;
     std::unordered_map<int, Cluster *> new_inverted_index;
@@ -65,11 +70,11 @@ std::unique_ptr<DynamicPositionListIndex> DynamicPositionListIndex::FullIntersec
     unsigned int new_size = 0;
 
     for (auto &[record_id, value_id] : hash_index_) {
-        if (!that->hash_index_.contains(record_id)) {
+        if (!that.hash_index_.contains(record_id)) {
             LOG(WARNING) << "Record id " << record_id << " not found in that index";
             continue;
         }
-        int that_value_id = that->hash_index_.at(record_id);
+        int that_value_id = that.hash_index_.at(record_id);
         partial_index[that_value_id].insert(record_id);
     }
 
@@ -99,4 +104,4 @@ std::string DynamicPositionListIndex::ToString() const {
     res.push_back(']');
     return res;
 }
-}  // namespace model::dynfd
+}  // namespace dynfd

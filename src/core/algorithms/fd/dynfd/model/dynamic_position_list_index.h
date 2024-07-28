@@ -3,10 +3,11 @@
 #include <list>
 #include <memory>
 #include <set>
+#include <table/position_list_index.h>
 #include <unordered_map>
 #include <vector>
 
-namespace model::dynfd {
+namespace dynfd {
 class DynamicPositionListIndex {
 public:
     /* Set of tuple indices */
@@ -27,6 +28,9 @@ public:
 
     static std::unique_ptr<DynamicPositionListIndex> CreateFor(std::vector<int> const &data);
 
+    static std::unique_ptr<DynamicPositionListIndex> CreateFromStaticPLI(
+            model::PositionListIndex const &pli);
+
     unsigned int GetSize() const;
 
     void Insert(int value_id);
@@ -34,10 +38,10 @@ public:
     void Erase(int record_id);
 
     std::unique_ptr<DynamicPositionListIndex> FullIntersect(
-            DynamicPositionListIndex const *that) const;
+            DynamicPositionListIndex const &that) const;
 
     std::string ToString() const;
 };
 
 using DPLI = DynamicPositionListIndex;
-}  // namespace model::dynfd
+}  // namespace dynfd

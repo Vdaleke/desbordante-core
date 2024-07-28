@@ -8,7 +8,7 @@
 
 #include "algorithms/fd/raw_fd.h"
 
-namespace algos::hyfd::fd_tree {
+namespace model {
 
 class FDTreeVertex;
 
@@ -46,6 +46,7 @@ private:
      */
     bool contains_children_ = false;
 
+    template<typename VertexType>
     friend class FDTree;
 
     FDTreeVertex* GetChild(size_t pos) {
@@ -155,4 +156,4 @@ public:
     }
 };
 
-}  // namespace algos::hyfd::fd_tree
+}  // namespace model

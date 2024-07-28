@@ -5,9 +5,9 @@
 #include "dynamic_position_list_index.h"
 #include "model/table/abstract_column_data.h"
 
-namespace model::dynfd {
+namespace dynfd {
 
-class CompressedColumnData : AbstractColumnData {
+class CompressedColumnData : model::AbstractColumnData {
     std::shared_ptr<DynamicPositionListIndex> position_list_index_;
 
 public:
@@ -19,4 +19,4 @@ public:
     [[nodiscard]] std::string ToString() const final;
 };
 
-}  // namespace model::dynfd
+}  // namespace dynfd

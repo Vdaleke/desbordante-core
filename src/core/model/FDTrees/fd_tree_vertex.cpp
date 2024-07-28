@@ -5,7 +5,7 @@
 
 #include <boost/dynamic_bitset.hpp>
 
-namespace algos::hyfd::fd_tree {
+namespace model {
 
 void FDTreeVertex::GetLevelRecursive(unsigned target_level, unsigned cur_level,
                                      boost::dynamic_bitset<> lhs, std::vector<LhsPair>& vertices) {
@@ -136,4 +136,4 @@ void FDTreeVertex::FillFDs(std::vector<RawFD>& fds, boost::dynamic_bitset<>& lhs
     }
 }
 
-}  // namespace algos::hyfd::fd_tree
+}  // namespace model

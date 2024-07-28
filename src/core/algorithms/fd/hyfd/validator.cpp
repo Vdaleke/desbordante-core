@@ -9,6 +9,7 @@
 #include <boost/dynamic_bitset.hpp>
 #include <easylogging++.h>
 
+#include "FDTrees/fd_tree.h"
 #include "algorithms/fd/hycommon/util/pli_util.h"
 #include "algorithms/fd/hycommon/validator_helpers.h"
 #include "hyfd_config.h"
@@ -108,13 +109,13 @@ boost::dynamic_bitset<> Refine(algos::hy::IdPairs& comparison_suggestions,
 }
 
 size_t AddExtendedCandidatesFromInvalid(std::vector<algos::hyfd::LhsPair>& next_level,
-                                        algos::hyfd::fd_tree::FDTree& fds_tree,
+                                        model::FDTree<>& fds_tree,
                                         std::vector<RawFD> const& invalid_fds,
                                         size_t num_attributes) {
     size_t candidates = 0;
     for (auto const& [lhs, rhs] : invalid_fds) {
         for (size_t attr = 0; attr < num_attributes; ++attr) {
-            if (lhs.test(attr) || rhs == attr || fds_tree.FindFdOrGeneral(lhs, attr) ||
+            if (lhs.test(attr) || rhs == attr || fds_tree.ContainsFdOrGeneral(lhs, attr) ||
                 (fds_tree.GetRoot().HasChildren() && fds_tree.GetRoot().ContainsChildAt(attr) &&
                  fds_tree.GetRoot().GetChild(attr)->IsFd(rhs))) {
                 continue;
@@ -123,7 +124,7 @@ size_t AddExtendedCandidatesFromInvalid(std::vector<algos::hyfd::LhsPair>& next_
             boost::dynamic_bitset<> lhs_ext = lhs;
             lhs_ext.set(attr);
 
-            if (fds_tree.FindFdOrGeneral(lhs_ext, rhs)) {
+            if (fds_tree.ContainsFdOrGeneral(lhs_ext, rhs)) {
                 continue;
             }
 
