@@ -45,6 +45,7 @@ jobs:
         exclude:
           - os: ubuntu-latest
             compiler: apple-clang
+          # Comment this to enable macOS-gcc tests:
           - os: macos-latest
             compiler: gcc
           # Comment this to enable macOS-llvm-clang tests:
@@ -76,6 +77,12 @@ jobs:
             export CXX=clang++-17
             export CXXFLAGS="-stdlib=libc++"
             export LDFLAGS="-lc++abi"
+          elif [[ ${{ matrix.os }} == 'macos-latest' && ${{ matrix.compiler }} == 'gcc' ]]; then
+            echo "macOS, GCC"
+
+            export CC=gcc-14
+            export CXX=g++-14
+            export BOOST_ROOT=/usr/local
           elif [[ ${{ matrix.os }} == 'macos-latest' && ${{ matrix.compiler }} == 'llvm-clang' ]]; then
             echo "macOS, LLVM Clang"
 
