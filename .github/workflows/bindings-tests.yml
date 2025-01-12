@@ -35,22 +35,22 @@ jobs:
         include:
           - os: ubuntu-latest
             compiler: gcc
-            env: CC=gcc-10 CXX=g++-10
+            env: CXX=g++-10
           - os: ubuntu-latest
             compiler: llvm-clang
-            env: CC=clang-17 CXX=clang++-17 CXXFLAGS="-stdlib=libc++" LDFLAGS="-lc++abi"
+            env: CXX=clang++-17 CXXFLAGS="-stdlib=libc++" LDFLAGS="-lc++abi"
           # Uncomment this to enable macOS gcc and llvm-clang tests:
           # - os: macos-latest
           #   compiler: gcc 
-          #   env: CC=gcc-14 CXX=g++-14 BOOST_ROOT=/usr/local
+          #   env: CXX=g++-14 BOOST_ROOT=/usr/local
           #   runtime-env: DYLD_LIBRARY_PATH=/usr/local/lib:${DYLD_LIBRARY_PATH}
           # - os: macos-latest
           #   compiler: llvm-clang
-          #   env: CC=$(brew --prefix llvm@17)/bin/clang CXX=$(brew --prefix llvm@17)/bin/clang++ BOOST_ROOT=/usr/local
+          #   env: CXX=$(brew --prefix llvm@17)/bin/clang++ BOOST_ROOT=/usr/local
           #   runtime-env: DYLD_LIBRARY_PATH=/usr/local/lib:${DYLD_LIBRARY_PATH}
           - os: macos-latest
             compiler: apple-clang
-            env: CC=clang CXX=clang++ BOOST_ROOT=$(brew --prefix boost)
+            env: CXX=clang++ BOOST_ROOT=$(brew --prefix boost)
     runs-on: ${{ matrix.os }}
     steps:
       - uses: actions/checkout@v3

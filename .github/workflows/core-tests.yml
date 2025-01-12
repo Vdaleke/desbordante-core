@@ -68,25 +68,21 @@ jobs:
           if [[ ${{ matrix.os }} == 'ubuntu-latest' && ${{ matrix.compiler }} == 'gcc' ]]; then
             echo "Ubuntu, GCC"
 
-            export CC=gcc-10
             export CXX=g++-10
           elif [[ ${{ matrix.os }} == 'ubuntu-latest' && ${{ matrix.compiler }} == 'llvm-clang' ]]; then
             echo "Ubuntu, LLVM Clang"
 
-            export CC=clang-17
             export CXX=clang++-17
             export CXXFLAGS="-stdlib=libc++"
             export LDFLAGS="-lc++abi"
           elif [[ ${{ matrix.os }} == 'macos-latest' && ${{ matrix.compiler }} == 'gcc' ]]; then
             echo "macOS, GCC"
 
-            export CC=gcc-14
             export CXX=g++-14
             export BOOST_ROOT=/usr/local
           elif [[ ${{ matrix.os }} == 'macos-latest' && ${{ matrix.compiler }} == 'llvm-clang' ]]; then
             echo "macOS, LLVM Clang"
 
-            export CC=$(brew --prefix llvm@17)/bin/clang
             export CXX=$(brew --prefix llvm@17)/bin/clang++
             export CXXFLAGS="-I$(brew --prefix llvm@17)/include"
             export LDFLAGS="-L$(brew --prefix llvm@17)/lib/c++"
