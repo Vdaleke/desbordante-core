@@ -20,7 +20,7 @@ public:
         std::vector<ColumnClassifierValueId> lhs_ccv_ids;
         if (size_limit_ == 0 || ccv_number <= size_limit_) {
             lhs_ccv_ids.reserve(ccv_number);
-            auto iota = std::views::iota(0ul, ccv_number);
+            auto iota = std::views::iota(static_cast<std::size_t>(0), ccv_number);
             lhs_ccv_ids.assign(iota.begin(), iota.end());
         } else {
             lhs_ccv_ids.reserve(size_limit_ + 1);

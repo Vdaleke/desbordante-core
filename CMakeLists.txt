@@ -132,6 +132,10 @@ else()
         endif()
     endif()
 
+    if(WIN32 AND (CMAKE_CXX_COMPILER_ID STREQUAL "GNU"))
+        link_libraries(ws2_32)
+    endif()
+
     add_compile_options("$<$<CONFIG:Debug>:${DEBUG_BUILD_OPTS}>")
     add_link_options("$<$<CONFIG:Debug>:${DEBUG_LINK_OPTS}>")
 

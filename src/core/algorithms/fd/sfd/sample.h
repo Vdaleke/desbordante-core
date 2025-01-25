@@ -25,7 +25,7 @@ private:
     size_t concat_cardinality_;
 
 public:
-    Sample(bool fixed_sample, unsigned long long sample_size, size_t rows, model::ColumnIndex lhs,
+    Sample(bool fixed_sample, unsigned long long sample_size, model::TupleIndex rows, model::ColumnIndex lhs,
            model::ColumnIndex rhs, std::vector<model::TypedColumnData> const &data,
            RelationalSchema const *rel_schema_);
     void Filter(FrequencyHandler const &handler, std::vector<model::TypedColumnData> const &data,
@@ -37,7 +37,7 @@ public:
                                                   long double max_false_positive_probability,
                                                   long double delta);
 
-    [[nodiscard]] std::vector<size_t> const &GetRowIndices() const {
+    [[nodiscard]] std::vector<model::TupleIndex> const &GetRowIndices() const {
         return row_indices_;
     }
 
