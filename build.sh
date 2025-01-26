@@ -75,7 +75,7 @@ if [[ ! -d "pybind11" ]] ; then
   git clone https://github.com/pybind/pybind11.git --branch v2.13.4 --depth 1
 fi
 if [[ ! -d "emhash" ]] ; then
-  git clone https://github.com/ktprime/emhash.git --depth 1
+  git clone https://github.com/Vdaleke/emhash.git --depth 1
 fi
 if [[ ! -d "atomicbitvector" ]] ; then
   git clone https://github.com/ekg/atomicbitvector.git --depth 1
@@ -120,4 +120,4 @@ cd ..
 mkdir -p build
 cd build
 rm -f CMakeCache.txt
-cmake $PREFIX .. && make $JOBS_OPTION
+cmake -G Ninja $PREFIX .. && cmake --build . $JOBS_OPTION

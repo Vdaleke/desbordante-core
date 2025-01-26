@@ -6,22 +6,56 @@ inputs:
     required: true
   download-command:
     description: 'Command to download the library'
+    type: choice
+    options:
+      git-clone
+      wget
+    default: git-clone
+  url:
+    description: 'URL of the library to download'
     required: true
+  git-branch:
+    description: 'Branch of git repo to download'
 runs:
   using: 'composite'
   steps:
+    - name: Set library hash as commit hash
+      id: get-commit-hash
+      run: |
+        git ls-remote ${{inputs.url}} ${{inputs.git-branch}} | awk '{print $1}'
+      shell: bash
+      env:
+        LIBRARY_HASH: ${{ steps.get-commit-hash.outputs.stdout }}
+      if: inputs.download-command == 'git-clone'
+    
+    - name: Set library hash as url 
+      id: get-url-hash
+      run: |
+       echo "LIBRARY_HASH=${{ inputs.url }}" >> $GITHUB_ENV
+      shell: bash
+
     - uses: actions/cache/restore@v4
       id: cache-library
       with:
         path: ${{github.workspace}}/lib/${{inputs.directory}}
-        key: ${{runner.os}}-${{inputs.directory}}
+        key: ${{runner.os}}-${{inputs.directory}}-${{env.LIBRARY_HASH}}
+
     - run: |
         cd lib
-        ${{inputs.download-command}}
+        git clone ${{inputs.url}} --branch ${{inputs.git-branch}} --depth 1
       shell: bash
-      if: steps.cache-library.outputs.cache-hit != 'true'
+      if: steps.cache-library.outputs.cache-hit != 'true' && inputs.download-command == 'git-clone'
+
+    - run: |
+        cd lib
+        wget ${{inputs.url}} -O ${{inputs.directory}}.tar.gz
+        tar xzvf ${{inputs.directory}}.tar.gz
+        rm ${{inputs.directory}}.tar.gz
+      shell: bash
+      if: steps.cache-library.outputs.cache-hit != 'true' && inputs.download-command == 'wget'
+
     - uses: actions/cache/save@v4
       with:
         path: ${{github.workspace}}/lib/${{inputs.directory}}
-        key: ${{runner.os}}-${{inputs.directory}}
+        key: ${{runner.os}}-${{inputs.directory}}-${{env.LIBRARY_HASH}}
       if: steps.cache-library.outputs.cache-hit != 'true'

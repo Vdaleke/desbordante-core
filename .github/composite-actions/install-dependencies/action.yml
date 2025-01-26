@@ -23,10 +23,6 @@ inputs:
       apple-clang
     default: gcc
 
-  install-toolset:
-    type: boolean
-    default: true
-
   install-boost:
     type: boolean
     default: true
@@ -34,16 +30,17 @@ inputs:
 runs:
   using: 'composite'
   steps:
-    - uses: actions/checkout@v3
 
+    # --- Set up environment ---
     - name: Get short OS name
-      shell: bash
       run: |
         function get_short_os_name() {
           if [[ $1 == *"ubuntu"* ]]; then
             echo "ubuntu"
           elif [[ $1 == *"macos"* ]]; then
             echo "macos"
+          elif [[ $1 == *"windows"* ]]; then
+            echo "windows"
           else
             echo "ERROR: unknown OS"
             exit 1
@@ -51,23 +48,53 @@ runs:
         }
 
         echo "OS=$(get_short_os_name ${{ inputs.os }})" >> $GITHUB_ENV
+      shell: bash
 
+    - uses: msys2/setup-msys2@v2
+      with:
+        msystem: MINGW64
+        install: >-
+          git
+      if: env.OS == 'windows'
+
+    # --- Install tools ---
+
+    # Install build tools
     - name: Install build tools using apt
       run: |
         sudo apt-get update -y
-        sudo apt-get install cmake build-essential -y
+        sudo apt-get install cmake ninja-build -y
       shell: bash
       if: env.OS == 'ubuntu'
     - name: Install build tools using brew
-      run: brew install make cmake --formula
+      run: |
+        brew install cmake --formula ninja
       shell: bash
       if: env.OS == 'macos'
+    - name: Install build tools using pacman
+      run: | 
+        pacman -S --noconfirm mingw-w64-x86_64-cmake mingw-w64-x86_64-ninja
+      shell: msys2 {0}
+      if: env.OS == 'windows'
 
+    # Install GCC toolset
     - name: Install GCC toolset (on Ubuntu)
       run: |
         sudo apt-get install gcc-10 g++-10 -y
       shell: bash
-      if: inputs.install-toolset == 'true' && inputs.toolset == 'gcc' && env.OS == 'ubuntu'
+      if: inputs.toolset == 'gcc' && env.OS == 'ubuntu'
+    - name: Install GCC toolset (on macOS)
+      run: |
+        brew install gcc@14
+      shell: bash
+      if: inputs.toolset == 'gcc' && env.OS == 'macos'
+    - name: Install GCC toolset (on Windows)
+      run: |
+        pacman -S --noconfirm mingw-w64-x86_64-gcc
+      shell: msys2 {0}
+      if: inputs.toolset == 'gcc' && env.OS == 'windows'
+    
+    # Install Clang toolset
     - name: Install Clang toolset (on Ubuntu)
       # "all" option is needed to install libc++ and libc++abi
       # apt is hardcoded in llvm.sh, so we can't use it everywhere
@@ -76,64 +103,89 @@ runs:
         chmod +x llvm.sh
         sudo ./llvm.sh 17 all
       shell: bash
-      if: inputs.install-toolset == 'true' && inputs.toolset == 'llvm-clang' && env.OS == 'ubuntu'
-    - name: Install GCC toolset (on macOS)
-      run: |
-        brew install gcc@14
-      shell: bash
-      if: inputs.install-toolset == 'true' && inputs.toolset == 'gcc' && env.OS == 'macos'
+      if: inputs.toolset == 'llvm-clang' && env.OS == 'ubuntu'
     - name: Install LLVM Clang toolset (on macOS)
-      run: brew install llvm@17
+      run: |
+        brew install llvm@17
       shell: bash
-      if: inputs.install-toolset == 'true' && inputs.toolset == 'llvm-clang' && env.OS == 'macos'
+      if: inputs.toolset == 'llvm-clang' && env.OS == 'macos'
+   
     # Apple Clang is installed by default on macOS runner
+
+    # --- Install libraries ---
+
+    # Set up git to not convert line endings on Windows
+    - run: |
+        git config --global core.autocrlf input
+      shell: msys2 {0}
+      if: env.OS == 'windows'
+
+    - uses: actions/checkout@v4
 
     - name: Make lib directory
       run: |
         mkdir -p lib
       shell: bash
 
-    - name: Download googletest
+    - name: Download atomicbitvector
       uses: ./.github/composite-actions/download-library
       with:
-        directory: googletest
-        download-command: git clone https://github.com/google/googletest/ --branch v1.14.0 --depth 1
-      if: inputs.download-googletest != 'false'
-
-    - name: Download easyloggingpp
-      uses: ./.github/composite-actions/download-library
-      with:
-        directory: easyloggingpp
-        download-command: git clone https://github.com/amrayn/easyloggingpp/ --branch v9.97.0 --depth 1
+        directory: atomicbitvector
+        download-command: git-clone
+        url: https://github.com/ekg/atomicbitvector.git 
+        git-branch: master
 
     - name: Download better-enums
       uses: ./.github/composite-actions/download-library
       with:
         directory: better-enums
-        download-command: git clone https://github.com/aantron/better-enums.git --branch 0.11.3 --depth 1
+        download-command: git-clone
+        url: https://github.com/aantron/better-enums.git 
+        git-branch: "0.11.3" 
+
+    - name: Download boost
+      uses: ./.github/composite-actions/download-library
+      with:
+        directory: boost
+        download-command: wget
+        url: https://sourceforge.net/projects/boost/files/boost/1.85.0/boost_1_85_0.tar.gz/download
+      if: inputs.install-boost == 'true' && (env.OS == 'ubuntu' || env.OS == 'macos')
+
+    - name: Download easyloggingpp
+      uses: ./.github/composite-actions/download-library
+      with:
+        directory: easyloggingpp
+        download-command: git-clone
+        url: https://github.com/amrayn/easyloggingpp/ 
+        git-branch: v9.97.0
+
+    - name: Download emhash
+      uses: ./.github/composite-actions/download-library
+      with:
+        directory: emhash
+        download-command: git-clone
+        url: https://github.com/Vdaleke/emhash.git 
+        git-branch: master
+
+    - name: Download googletest
+      uses: ./.github/composite-actions/download-library
+      with:
+        directory: googletest
+        download-command: git-clone
+        url: https://github.com/google/googletest/
+        git-branch: v1.14.0
+      if: inputs.download-googletest == 'true'
 
     - name: Download pybind11
       uses: ./.github/composite-actions/download-library
       with:
         directory: pybind11
-        download-command: git clone https://github.com/pybind/pybind11.git --branch v2.13.4 --depth 1
-      if: inputs.download-pybind != 'false'
-    - name: Download emhash
-      uses: ./.github/composite-actions/download-library
-      with:
-        directory: emhash
-        download-command: git clone https://github.com/ktprime/emhash.git --depth 1
-    - name: Download atomicbitvector
-      uses: ./.github/composite-actions/download-library
-      with:
-        directory: atomicbitvector
-        download-command: git clone https://github.com/ekg/atomicbitvector.git --depth 1
-    - name: Download boost
-      uses: ./.github/composite-actions/download-library
-      with:
-        directory: boost
-        download-command: wget -O boost_1_85_0.tar.gz https://sourceforge.net/projects/boost/files/boost/1.85.0/boost_1_85_0.tar.gz/download && tar xzvf boost_1_85_0.tar.gz && mv boost_1_85_0 boost
+        download-command: git-clone
+        url: https://github.com/pybind/pybind11.git 
+        git-branch: v2.13.4
+      if: inputs.download-pybind == 'true'
 
+    # Install Boost built with GCC
     - name: Install Boost built with GCC (on Ubuntu)
       run: |
         cd lib/boost
@@ -141,14 +193,6 @@ runs:
         sudo ./b2 install --prefix=/usr
       shell: bash
       if: inputs.install-boost == 'true' && inputs.toolset == 'gcc' && env.OS == 'ubuntu'
-    - name: Install Boost built with Clang (on Ubuntu)
-      run: |
-        cd lib/boost
-        ./bootstrap.sh --with-libraries=container,thread,graph
-        sudo ./b2 install -a --prefix=/usr toolset=clang cxxflags="-stdlib=libc++" \
-         linkflags="-stdlib=libc++"
-      shell: bash
-      if: inputs.install-boost == 'true' && inputs.toolset == 'llvm-clang' && env.OS == 'ubuntu'
     - name: Install Boost built with GCC (on macOS)
       run: | 
         cd lib/boost
@@ -157,6 +201,21 @@ runs:
         sudo ./b2 install -a --user-config=user-config.jam --prefix=/usr/local
       shell: bash
       if: inputs.install-boost == 'true' && inputs.toolset == 'gcc' && env.OS == 'macos'
+    - name: Install Boost built with GCC (on Windows)
+      run: |
+        pacman -S --noconfirm mingw-w64-x86_64-boost
+      if: inputs.install-boost == 'true' && inputs.toolset == 'gcc' && env.OS == 'windows'
+      shell: msys2 {0}
+
+    # Install Boost built with Clang
+    - name: Install Boost built with Clang (on Ubuntu)
+      run: |
+        cd lib/boost
+        ./bootstrap.sh --with-libraries=container,thread,graph
+        sudo ./b2 install -a --prefix=/usr toolset=clang cxxflags="-stdlib=libc++" \
+         linkflags="-stdlib=libc++"
+      shell: bash
+      if: inputs.install-boost == 'true' && inputs.toolset == 'llvm-clang' && env.OS == 'ubuntu'
     - name: Install Boost built with LLVM Clang (on macOS)
       run: |
         cd lib/boost
@@ -167,8 +226,11 @@ runs:
          linkflags="-L$(brew --prefix llvm@17)/lib/c++"
       shell: bash
       if: inputs.install-boost == 'true' && inputs.toolset == 'llvm-clang' && env.OS == 'macos'
+   
+    # Install Boost built with Apple Clang
     - name: Install Boost built with Apple Clang
-      run: brew install boost
+      run: |
+        brew install boost
       shell: bash
       if: inputs.install-boost == 'true' && inputs.toolset == 'apple-clang'
 
@@ -183,10 +245,8 @@ runs:
 #      run: |
 #         curl -s https://packagecloud.io/install/repositories/github/git-lfs/script.deb.sh | sudo bash
 #         git lfs install
-#      shell: bash
 #    - name: Generate lfs file list
 #      run: git lfs ls-files -l | cut -d' ' -f1 | sort > .lfs-assets-id
-#      shell: bash
 #    - name: Restore lfs cache
 #      uses: actions/cache@v3
 #      id: lfs-cache
