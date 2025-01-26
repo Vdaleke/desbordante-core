@@ -1,5 +1,8 @@
 #!/bin/bash
 
+# Stop on error:
+set -e
+
 function print_help() {
 cat << EOF
 Usage: ./build.sh [options]
@@ -72,7 +75,7 @@ if [[ ! -d "pybind11" ]] ; then
   git clone https://github.com/pybind/pybind11.git --branch v2.13.4 --depth 1
 fi
 if [[ ! -d "emhash" ]] ; then
-  git clone https://github.com/ktprime/emhash.git --depth 1
+  git clone https://github.com/Vdaleke/emhash.git --depth 1
 fi
 if [[ ! -d "atomicbitvector" ]] ; then
   git clone https://github.com/ekg/atomicbitvector.git --depth 1
@@ -85,7 +88,7 @@ if [[ $NO_TESTS == true ]]; then
   PREFIX="$PREFIX -D COMPILE_TESTS=OFF"
 else
   if [[ ! -d "googletest" ]] ; then
-    git clone https://github.com/google/googletest/ --branch v1.13.0 --depth 1
+    git clone https://github.com/google/googletest/ --branch v1.14.0 --depth 1
   fi
 fi
 
@@ -116,5 +119,5 @@ fi
 cd ..
 mkdir -p build
 cd build
-rm CMakeCache.txt
-cmake $PREFIX .. && make $JOBS_OPTION
+rm -f CMakeCache.txt
+cmake -G Ninja $PREFIX .. && cmake --build . $JOBS_OPTION

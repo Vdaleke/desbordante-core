@@ -79,7 +79,7 @@ TEST(pliIntersectChecker, first) {
 }
 
 TEST(testingBitsetToLonglong, first) {
-    size_t encoded_num = 1254;
+    unsigned long encoded_num = 1254;
     boost::dynamic_bitset<> simple_bitset{20, encoded_num};
 
     auto res_vector = *model::ListAgreeSetSample::BitSetToLongLongVector(simple_bitset);

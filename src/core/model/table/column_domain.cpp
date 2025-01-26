@@ -174,7 +174,7 @@ private:
         if (processed_block_count_ == 0) {
             auto const approx_block_count =
                     static_cast<size_t>(Partition::kMaximumBytesPerChar * block_capacity_);
-            return std::max(1UL, mem_limit_ / approx_block_count);
+            return std::max(static_cast<size_t>(1), mem_limit_ / approx_block_count);
         }
         /* otherwise, use the average amount of memory spent per processed block */
         size_t const per_block_mem_usage = mem_usage_ / processed_block_count_;
