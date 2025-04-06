@@ -3,6 +3,7 @@
 .venv/
 build/
 cmake-build-debug/
+cpm-cache/
 dist/
 lib/
 venv/
