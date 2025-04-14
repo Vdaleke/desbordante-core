@@ -8,7 +8,7 @@ file(GLOB_RECURSE test_sources "*.h*" "*.cpp*")
 add_executable(${BINARY} ${test_sources})
 
 # linking with gtest and implemented classes
-target_link_libraries(${BINARY} PRIVATE ${CMAKE_PROJECT_NAME} gtest gmock Boost::graph)
+target_link_libraries(${BINARY} PRIVATE ${CMAKE_PROJECT_NAME} gtest gmock Boost::graph Boost::included_unit_test_framework Boost::format Boost::align)
 
 gtest_discover_tests(${BINARY} WORKING_DIRECTORY "${CMAKE_RUNTIME_OUTPUT_DIRECTORY}")
 

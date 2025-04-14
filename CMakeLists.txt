@@ -210,9 +210,20 @@ if(USE_LTO)
     set(CMAKE_INTERPROCEDURAL_OPTIMIZATION TRUE)
 endif()
 
+if(PYTHON)
+    set(CMAKE_POSITION_INDEPENDENT_CODE ON)
+endif()
+
 # --- Dependencies installation ---
 
 include(cmake/CPM.cmake)
+
+# Set CPM cache location
+if(DEFINED ENV{CPM_SOURCE_CACHE})
+    set(CPM_SOURCE_CACHE $ENV{CPM_SOURCE_CACHE})
+else()
+    set(CPM_SOURCE_CACHE "${CMAKE_CURRENT_SOURCE_DIR}/cmake/cpm-cache")
+endif()
 
 CPMAddPackage(
     NAME easyloggingpp
@@ -261,19 +272,18 @@ if(PYTHON)
     CPMAddPackage("gh:pybind/pybind11@2.13.4")
 endif()
 
-# configuring boost
-set(Boost_USE_STATIC_LIBS OFF)
-
-find_package(Boost 1.81.0 REQUIRED COMPONENTS container thread graph)
-if(Boost_FOUND)
-    message(STATUS "Found Boost include dirs: ${Boost_INCLUDE_DIRS}")
-    include_directories(${Boost_INCLUDE_DIRS})
-    message(STATUS "Found Boost library dirs: ${Boost_LIBRARY_DIRS}")
-else()
-    message(FATAL_ERROR "Boost not found. If boost is installed specify environment"
-                        "variables like \"BOOST_ROOT\" for hint to CMake where to search"
-    )
-endif()
+CPMAddPackage(
+  NAME Boost
+  VERSION 1.87.0
+  URL https://github.com/boostorg/boost/releases/download/boost-1.87.0/boost-1.87.0-cmake.tar.xz
+  URL_HASH SHA256=7da75f171837577a52bbf217e17f8ea576c7c246e4594d617bfde7fafd408be5
+  OPTIONS "BOOST_ENABLE_CMAKE ON" 
+          "BOOST_SKIP_INSTALL_RULES ON"
+          "BUILD_SHARED_LIBS OFF" 
+          "BOOST_INCLUDE_LIBRARIES container\\\;thread\\\;graph\\\;test\\\;format\\\;asio"
+  SYSTEM YES
+  EXCLUDE_FROM_ALL YES
+)
 
 # --- Core Project Structure and Module Setup ---
 

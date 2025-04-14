@@ -53,12 +53,12 @@ runs:
 
         echo "OS=$(get_short_os_name ${{ inputs.os }})" >> $GITHUB_ENV
 
-    - name: Set up cache
+    - name: Set up CPM.cmake cache
       id: cache-cpm
       uses: actions/cache@v4
       with:
-        path: ~/cpm-cache
-        key: ${{ runner.os }}-cpm-${{ hashFiles('**/') }}
+        path: ./cmake/cpm-cache
+        key: ${{ runner.os }}-cpm-${{ hashFiles('**/CMakeLists.txt') }}-${{ hashFiles('**/cmake/CPM.cmake') }}
         restore-keys: |
           ${{ runner.os }}-cpm-
 
@@ -109,61 +109,6 @@ runs:
       shell: bash
       if: inputs.install-toolset == 'true' && inputs.toolset == 'llvm-clang' && env.OS == 'macos'
     # Apple Clang is installed by default on macOS runner
-
-    - name: Make lib directory
-      run: |
-        mkdir -p lib
-      shell: bash
-
-    - name: Download boost
-      uses: ./.github/composite-actions/download-library
-      with:
-        directory: boost
-        download-command: wget -O boost_1_85_0.tar.gz https://sourceforge.net/projects/boost/files/boost/1.85.0/boost_1_85_0.tar.gz/download && tar xzvf boost_1_85_0.tar.gz && mv boost_1_85_0 boost
-
-    - name: Install Boost built with GCC (on Ubuntu)
-      run: |
-        cd lib/boost
-        ./bootstrap.sh --with-libraries=container,thread,graph
-        sudo ./b2 install --prefix=/usr
-      shell: bash
-      if: inputs.install-boost == 'true' && inputs.toolset == 'gcc' && env.OS == 'ubuntu'
-    - name: Install Boost built with Clang (on Ubuntu)
-      run: |
-        cd lib/boost
-        ./bootstrap.sh --with-libraries=container,thread,graph
-        sudo ./b2 install -a --prefix=/usr toolset=clang cxxflags="-stdlib=libc++" \
-         linkflags="-stdlib=libc++"
-      shell: bash
-      if: inputs.install-boost == 'true' && inputs.toolset == 'llvm-clang' && env.OS == 'ubuntu'
-    - name: Install Boost built with GCC (on macOS)
-      run: | 
-        cd lib/boost
-        ./bootstrap.sh --with-libraries=container,thread,graph 
-        echo "using darwin : : g++-14 ;" > user-config.jam
-        sudo ./b2 install -a --user-config=user-config.jam --prefix=/usr/local
-      shell: bash
-      if: inputs.install-boost == 'true' && inputs.toolset == 'gcc' && env.OS == 'macos'
-    - name: Install Boost built with LLVM Clang (on macOS)
-      run: |
-        cd lib/boost
-        ./bootstrap.sh --with-libraries=container,thread,graph
-        echo "using darwin : : $(brew --prefix llvm@17)/bin/clang++ ;" > user-config.jam
-        sudo ./b2 install -a --user-config=user-config.jam --prefix=/usr/local \
-         cxxflags="-std=c++11 -I$(brew --prefix llvm@17)/include" \
-         linkflags="-L$(brew --prefix llvm@17)/lib/c++"
-      shell: bash
-      if: inputs.install-boost == 'true' && inputs.toolset == 'llvm-clang' && env.OS == 'macos'
-    - name: Install Boost built with Apple Clang
-      run: brew install boost
-      shell: bash
-      if: inputs.install-boost == 'true' && inputs.toolset == 'apple-clang'
-
-    - name: Download frozen
-      uses: ./.github/composite-actions/download-library
-      with:
-        directory: frozen
-        download-command: git clone https://github.com/serge-sans-paille/frozen.git --depth 1
 
 #    Uncomment this if we set up our own git lfs server
 #    - name: Install git-lfs

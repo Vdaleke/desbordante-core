@@ -6,8 +6,8 @@ set(THREADS_PREFER_PTHREAD_FLAG ON)
 find_package(Threads REQUIRED)
 
 add_library(${BINARY} STATIC ${lib_sources})
-set_property(TARGET ${BINARY} PROPERTY POSITION_INDEPENDENT_CODE ON)
-target_link_libraries(${BINARY} PRIVATE ${Boost_LIBRARIES} Threads::Threads)
+target_link_libraries(${BINARY} PUBLIC Boost::headers Boost::included_unit_test_framework Boost::container Boost::thread Boost::graph Boost::any Boost::dynamic_bitset 
+    Boost::serialization Boost::math Boost::format Boost::align Boost::asio Threads::Threads)
 target_link_libraries(${BINARY} PUBLIC easyloggingpp)
 
 option(SAFE_VERTICAL_HASHING
@@ -17,4 +17,3 @@ option(SAFE_VERTICAL_HASHING
 if (SAFE_VERTICAL_HASHING)
     target_compile_definitions(${BINARY} PUBLIC SAFE_VERTICAL_HASHING)
 endif(SAFE_VERTICAL_HASHING)
-
